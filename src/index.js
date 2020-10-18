@@ -23,10 +23,23 @@ export default class AudioReactRecorder extends React.Component {
 
   //TODO: add the props definitions
   static propTypes = {
-    state: Propt
+    state: PropTypes.string,
+    type: PropTypes.string.isRequired,
+    backgroundColor: PropTypes.string,
+    foregroundColor: PropTypes.string,
+    canvasWidth: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    canvasHeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+
+    //method calls
+    onStop: PropTypes.func
   }
   static defaultProps = {
-    state: RecordState.NONE
+    state: RecordState.NONE,
+    type: 'audio/wav',
+    backgroundColor: 'rgb(200, 200, 200)',
+    foregroundColor: 'rgb(0, 0, 0)',
+    canvasWidth: 500,
+    canvasHeight: 300
   }
 
   //2 - mount
@@ -206,6 +219,8 @@ export default class AudioReactRecorder extends React.Component {
   }
 
   visualize = () => {
+    const { backgroundColor, foregroundColor } = this.props
+
     this.WIDTH = this.canvas.width
     this.HEIGHT = this.canvas.height
     this.CENTERX = this.canvas.width / 2
@@ -226,11 +241,11 @@ export default class AudioReactRecorder extends React.Component {
 
       self.analyser.getByteTimeDomainData(dataArray)
 
-      self.canvasCtx.fillStyle = 'rgb(200, 200, 200)'
+      self.canvasCtx.fillStyle = backgroundColor
       self.canvasCtx.fillRect(0, 0, self.WIDTH, self.HEIGHT)
 
       self.canvasCtx.lineWidth = 2
-      self.canvasCtx.strokeStyle = 'rgb(0, 0, 0)'
+      self.canvasCtx.strokeStyle = foregroundColor
 
       self.canvasCtx.beginPath()
 
@@ -266,7 +281,7 @@ export default class AudioReactRecorder extends React.Component {
   }
 
   stop = () => {
-    const { onStop } = this.props
+    const { onStop, type } = this.props
 
     this.recording = false
 
@@ -315,20 +330,14 @@ export default class AudioReactRecorder extends React.Component {
     }
 
     // our final binary blob
-    const blob = new Blob([view], { type: 'audio/wav' })
-
+    const blob = new Blob([view], { type: type })
     const audioUrl = URL.createObjectURL(blob)
-    console.log('BLOB ', blob)
-    console.log('URL ', audioUrl)
-    document.querySelector('#audio').setAttribute('src', audioUrl)
-    const link = document.querySelector('#download')
-    link.setAttribute('href', audioUrl)
-    link.download = 'output.wav'
 
     onStop &&
       onStop({
         blob: blob,
-        url: audioUrl
+        url: audioUrl,
+        type
       })
   }
 
@@ -342,11 +351,16 @@ export default class AudioReactRecorder extends React.Component {
 
   //1 - render
   render() {
+    const { canvasWidth, canvasHeight } = this.props
+
     return (
       <div className='audio-react-recorder'>
-        <canvas ref={this.canvasRef} width='500' height='300'></canvas>
-        <audio id='audio' controls></audio>
-        <a id='download'>download</a>
+        <canvas
+          ref={this.canvasRef}
+          width={canvasWidth}
+          height={canvasHeight}
+          className='audio-react-recorder__canvas'
+        ></canvas>
       </div>
     )
   }
