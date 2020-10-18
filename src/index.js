@@ -1,20 +1,72 @@
 import React from 'react'
 import styles from './styles.module.css'
+import PropTypes from 'prop-types' // ES6
 
 // export const AudioReactRecorder = ({ text }) => {
 //   return <div className={styles.test}>BULLSWEET: {text}</div>
 // }
 
+export const RecordState = Object.freeze({
+  START: 'start',
+  PAUSE: 'pause',
+  STOP: 'stop',
+  NONE: 'none'
+})
+
 export default class AudioReactRecorder extends React.Component {
   //0 - constructor
   constructor(props) {
     super(props)
+
+    this.canvasRef = React.createRef()
+  }
+
+  //TODO: add the props definitions
+  static propTypes = {
+    state: Propt
+  }
+  static defaultProps = {
+    state: RecordState.NONE
   }
 
   //2 - mount
   componentDidMount() {
     this.init()
   }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { state } = this.props
+
+    this.checkState(prevProps.state, state)
+  }
+
+  checkState(previousState) {
+    console.log('previousState', previousState)
+    switch (previousState) {
+      case RecordState.START:
+        this.doIfState(RecordState.PAUSE, this.pause)
+        this.doIfState(RecordState.STOP, this.stop)
+        break
+      case RecordState.PAUSE:
+        this.doIfState(RecordState.START, this.resume)
+        break
+      case RecordState.STOP:
+        this.doIfState(RecordState.START, this.start)
+        break
+      default:
+        this.doIfState(RecordState.START, this.start)
+        break
+    }
+  }
+
+  doIfState(state, cb) {
+    if (this.props.state == state) {
+      cb && cb()
+    }
+  }
+
+  //TODO: destroy request animation frame
+  componentWillUnmount() {}
 
   //TODO: change to state some conditionals
   init = async () => {
@@ -29,7 +81,7 @@ export default class AudioReactRecorder extends React.Component {
     this.AudioContext = window.AudioContext || window.webkitAudioContext
     this.context = null
     this.analyser = null
-    this.canvas = document.querySelector('canvas')
+    this.canvas = this.canvasRef.current
     this.canvasCtx = this.canvas.getContext('2d')
     this.stream = null
     this.tested = false
@@ -63,7 +115,7 @@ export default class AudioReactRecorder extends React.Component {
   }
 
   setUpRecording = () => {
-    this.context = new AudioContext()
+    this.context = new this.AudioContext()
     this.sampleRate = this.context.sampleRate
 
     // creates a gain node
@@ -97,14 +149,13 @@ export default class AudioReactRecorder extends React.Component {
       // Check
       if (!self.recording) return
       // Do something with the data, i.e Convert this to WAV
-      console.log('recording')
       let left = e.inputBuffer.getChannelData(0)
       let right = e.inputBuffer.getChannelData(1)
       if (!self.tested) {
         self.tested = true
         // if this reduces to 0 we are not getting any sound
         if (!left.reduce((a, b) => a + b)) {
-          alert('There seems to be an issue with your Mic')
+          console.log('There seems to be an issue with your Mic')
           // clean up;
           self.stop()
           self.stream.getTracks().forEach(function (track) {
@@ -164,7 +215,6 @@ export default class AudioReactRecorder extends React.Component {
 
     this.analyser.fftSize = 2048
     const bufferLength = this.analyser.fftSize
-    console.log(bufferLength)
     const dataArray = new Uint8Array(bufferLength)
 
     this.canvasCtx.clearRect(0, 0, this.WIDTH, this.HEIGHT)
@@ -212,12 +262,12 @@ export default class AudioReactRecorder extends React.Component {
     // reset the buffers for the new recording
     this.leftchannel.length = this.rightchannel.length = 0
     this.recordingLength = 0
-    console.log('context: ', !!this.context)
     if (!this.context) this.setUpRecording()
   }
 
   stop = () => {
-    console.log('Stop')
+    const { onStop } = this.props
+
     this.recording = false
 
     // we flat the left and right channels down
@@ -274,30 +324,27 @@ export default class AudioReactRecorder extends React.Component {
     const link = document.querySelector('#download')
     link.setAttribute('href', audioUrl)
     link.download = 'output.wav'
+
+    onStop &&
+      onStop({
+        blob: blob,
+        url: audioUrl
+      })
   }
 
   pause = () => {
     this.recording = false
-    this.context.suspend()
   }
 
   resume = () => {
     this.recording = true
-    this.context.resume()
   }
 
   //1 - render
   render() {
     return (
       <div className='audio-react-recorder'>
-        Don't Follow Rules {this.props.text}
-        <button id='record' onClick={this.start}>
-          Start
-        </button>
-        <button id='stop' onClick={this.stop}>
-          Stop
-        </button>
-        <canvas width='500' height='300'></canvas>
+        <canvas ref={this.canvasRef} width='500' height='300'></canvas>
         <audio id='audio' controls></audio>
         <a id='download'>download</a>
       </div>
