@@ -4,7 +4,7 @@
   "description": "Audio / Voice Recorder for React",
   "author": "noobieprogrammer",
   "license": "MIT",
-  "repository": "noobieprogrammer/audio-react-recorder",
+  "repository": "doppelgunner/audio-react-recorder",
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
   "source": "src/index.js",
