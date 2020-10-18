@@ -11,6 +11,16 @@
   "engines": {
     "node": ">=10"
   },
+  "keywords": [
+    "react",
+    "record",
+    "audio",
+    "voice",
+    "record.js",
+    "mic",
+    "recorder",
+    "audiowave"
+  ],
   "scripts": {
     "build": "microbundle-crl --no-compress --format modern,cjs",
     "start": "microbundle-crl watch --no-compress --format modern,cjs",

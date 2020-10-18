@@ -1,6 +1,6 @@
 # audio-react-recorder
 
-> Audio / Voice Recorder for React using the [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+> Audio / Voice Recorder w/ Audio Wave for React using the [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 
 [![NPM](https://img.shields.io/npm/v/audio-react-recorder.svg)](https://www.npmjs.com/package/audio-react-recorder) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
