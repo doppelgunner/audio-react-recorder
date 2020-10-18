@@ -10,6 +10,10 @@
 npm install --save audio-react-recorder
 ```
 
+## DEMO
+
+[AudioReactRecorder demo](https://doppelgunner.github.io/audio-react-recorder/)
+
 ## Usage
 
 ```jsx
