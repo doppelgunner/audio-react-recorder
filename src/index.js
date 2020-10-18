@@ -54,7 +54,6 @@ export default class AudioReactRecorder extends React.Component {
   }
 
   checkState(previousState) {
-    console.log('previousState', previousState)
     switch (previousState) {
       case RecordState.START:
         this.doIfState(RecordState.PAUSE, this.pause)
@@ -62,6 +61,7 @@ export default class AudioReactRecorder extends React.Component {
         break
       case RecordState.PAUSE:
         this.doIfState(RecordState.START, this.resume)
+        this.doIfState(RecordState.STOP, this.stop)
         break
       case RecordState.STOP:
         this.doIfState(RecordState.START, this.start)
@@ -103,19 +103,6 @@ export default class AudioReactRecorder extends React.Component {
       navigator.getUserMedia ||
       navigator.webkitGetUserMedia ||
       navigator.mozGetUserMedia
-
-    //TODO: only get stream after clicking start
-    try {
-      window.stream = this.stream = await this.getStream()
-      //TODO: on got stream
-      console.log('Got stream')
-    } catch (err) {
-      console.log('err', err)
-      //TODO: error getting stream
-      alert('Issue getting mic', err)
-    }
-
-    this.setUpRecording()
   }
 
   //get mic stream
@@ -147,18 +134,18 @@ export default class AudioReactRecorder extends React.Component {
     // analyser.connect(volume);
 
     let bufferSize = 2048
-    let recorder = this.context.createScriptProcessor(bufferSize, 2, 2)
+    this.recorder = this.context.createScriptProcessor(bufferSize, 2, 2)
 
     // we connect the volume control to the processor
     // volume.connect(recorder);
 
-    this.analyser.connect(recorder)
+    this.analyser.connect(this.recorder)
 
     // finally connect the processor to the output
-    recorder.connect(this.context.destination)
+    this.recorder.connect(this.context.destination)
 
     const self = this
-    recorder.onaudioprocess = function (e) {
+    this.recorder.onaudioprocess = function (e) {
       // Check
       if (!self.recording) return
       // Do something with the data, i.e Convert this to WAV
@@ -168,7 +155,7 @@ export default class AudioReactRecorder extends React.Component {
         self.tested = true
         // if this reduces to 0 we are not getting any sound
         if (!left.reduce((a, b) => a + b)) {
-          console.log('There seems to be an issue with your Mic')
+          console.log('Error: There seems to be an issue with your Mic')
           // clean up;
           self.stop()
           self.stream.getTracks().forEach(function (track) {
@@ -272,18 +259,33 @@ export default class AudioReactRecorder extends React.Component {
     draw()
   }
 
-  start = () => {
+  setupMic = async () => {
+    //TODO: only get stream after clicking start
+    try {
+      window.stream = this.stream = await this.getStream()
+      //TODO: on got stream
+    } catch (err) {
+      //TODO: error getting stream
+      console.log('Error: Issue getting mic', err)
+    }
+
+    this.setUpRecording()
+  }
+
+  start = async () => {
+    await this.setupMic()
+
     this.recording = true
     // reset the buffers for the new recording
     this.leftchannel.length = this.rightchannel.length = 0
     this.recordingLength = 0
-    if (!this.context) this.setUpRecording()
   }
 
   stop = () => {
     const { onStop, type } = this.props
 
     this.recording = false
+    this.closeMic()
 
     // we flat the left and right channels down
     this.leftBuffer = this.mergeBuffers(this.leftchannel, this.recordingLength)
@@ -343,10 +345,21 @@ export default class AudioReactRecorder extends React.Component {
 
   pause = () => {
     this.recording = false
+    this.closeMic()
   }
 
   resume = () => {
+    this.setupMic()
     this.recording = true
+  }
+
+  closeMic = () => {
+    this.stream.getAudioTracks().forEach((track) => {
+      track.stop()
+    })
+    this.audioInput.disconnect(0)
+    this.analyser.disconnect(0)
+    this.recorder.disconnect(0)
   }
 
   //1 - render
