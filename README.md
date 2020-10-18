@@ -76,3 +76,7 @@ MIT © [noobieprogrammer](https://github.com/noobieprogrammer)
 ## Buy me a coffee or just follow me
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GCJGP8MTETUYU)
+
+- [My Blog](https://noobieprogrammer.blogspot.com/)
+- [Twitter](https://twitter.com/noobieprogrmmer)
+- [Youtube](https://www.youtube.com/channel/UCpzMkMzGopmft5welUr8QZg)
