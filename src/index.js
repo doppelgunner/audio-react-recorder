@@ -161,7 +161,8 @@ export default class AudioReactRecorder extends React.Component {
           self.stream.getTracks().forEach(function (track) {
             track.stop()
           })
-          self.context.closeMic()
+          // self.context.close() // error being thrown on this line
+          this.closeMic()
         }
       }
       // we clone the samples
