@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/doppelgunner/audio-react-recorder.git"
+    "url": "https://github.com/Solaris97/audio-react-recorder.git"
   },
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
@@ -14,7 +14,7 @@
   "engines": {
     "node": ">=10"
   },
-  "homepage": "https://github.com/doppelgunner/audio-react-recorder#readme",
+  "homepage": "https://github.com/Solaris97/audio-react-recorder#readme",
   "keywords": [
     "react",
     "record",
